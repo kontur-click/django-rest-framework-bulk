@@ -16,7 +16,7 @@ class BulkSerializerMixin(object):
         ret = super(BulkSerializerMixin, self).to_internal_value(data)
 
         id_attr = getattr(self.Meta, 'update_lookup_field', 'id')
-        request_method = getattr(getattr(self.context.get('view'), 'request'), 'method', '')
+        request_method = getattr(self.context['request'], 'method', '')
 
         # add update_lookup_field field back to validated data
         # since super by default strips out read-only fields
