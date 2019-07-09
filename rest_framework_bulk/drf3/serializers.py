@@ -38,6 +38,19 @@ class BulkSerializerMixin(object):
 class BulkListSerializer(ListSerializer):
     update_lookup_field = 'id'
 
+    def update_or_create_instance(self, child, data, obj=None):
+        model_serializer = child.__class__(instance=obj, data=data,
+                                           context=self.context)
+        model_serializer.is_valid()
+        model_serializer.save()
+        return model_serializer.instance
+
+    def create(self, validated_data):
+        return [
+            self.update_or_create_instance(self.child, attrs)
+            for attrs in validated_data
+        ]
+
     def update(self, queryset, all_validated_data):
         id_attr = getattr(self.child.Meta, 'update_lookup_field', 'id')
 
@@ -68,7 +81,9 @@ class BulkListSerializer(ListSerializer):
 
             # use model serializer to actually update the model
             # in case that method is overwritten
-            updated_objects.append(self.child.update(obj, obj_validated_data))
+            updated_objects.append(
+                self.update_or_create_instance(self.child, obj_validated_data,
+                                               obj))
 
         return updated_objects
 
