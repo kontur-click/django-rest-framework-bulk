@@ -101,7 +101,7 @@ class BulkListSerializer(ListSerializer):
 
         for item in data:
             try:
-                self.child.instance = self.instance.get(id=item['id'])
+                self.child.instance = self.instance.get(id=item['id']) if self.instance else None
                 self.child.initial_data = item
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
