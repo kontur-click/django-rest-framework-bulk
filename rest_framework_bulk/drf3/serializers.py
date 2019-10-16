@@ -40,7 +40,7 @@ class BulkListSerializer(ListSerializer):
 
     def update_or_create_instance(self, child, data, obj=None):
         model_serializer = child.__class__(instance=obj, data=data,
-                                           context=self.context)
+                                           context=self.context, partial=self.partial)
         model_serializer.is_valid()
         model_serializer.save()
         return model_serializer.instance
@@ -54,20 +54,19 @@ class BulkListSerializer(ListSerializer):
     def update(self, queryset, all_validated_data):
         id_attr = getattr(self.child.Meta, 'update_lookup_field', 'id')
 
-        all_validated_data_by_id = {
-            i.pop(id_attr): i
-            for i in all_validated_data
-        }
+        all_validated_data_by_id = {}
+        for i in all_validated_data:
+            key = i.get(id_attr)
+            if not (bool(key) and not inspect.isclass(key)):
+                raise ValidationError('')
 
-        if not all((bool(i) and not inspect.isclass(i)
-                    for i in all_validated_data_by_id.keys())):
-            raise ValidationError('')
+            all_validated_data_by_id[str(key)] = i
 
         # since this method is given a queryset which can have many
         # model instances, first find all objects to update
         # and only then update the models
         objects_to_update = queryset.filter(**{
-            '{}__in'.format(id_attr): all_validated_data_by_id.keys(),
+            '{}__in'.format(id_attr): list(all_validated_data_by_id.keys()),
         })
 
         if len(all_validated_data_by_id) != objects_to_update.count():
@@ -76,7 +75,7 @@ class BulkListSerializer(ListSerializer):
         updated_objects = []
 
         for obj in objects_to_update:
-            obj_id = getattr(obj, id_attr)
+            obj_id = str(getattr(obj, id_attr))
             obj_validated_data = all_validated_data_by_id.get(obj_id)
 
             # use model serializer to actually update the model

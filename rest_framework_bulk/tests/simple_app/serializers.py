@@ -11,3 +11,4 @@ class SimpleSerializer(BulkSerializerMixin,  # only required in DRF3
         model = SimpleModel
         # only required in DRF3
         list_serializer_class = BulkListSerializer
+        fields = '__all__'
