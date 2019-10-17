@@ -1,9 +1,9 @@
 from __future__ import unicode_literals, print_function
 import json
 
-from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import RequestFactory
+from django.urls import reverse
 from rest_framework import status
 
 from .simple_app.models import SimpleModel
@@ -167,7 +167,7 @@ class TestBulkAPIViewSet(TestCase):
 
     def setUp(self):
         super(TestBulkAPIViewSet, self).setUp()
-        self.url = reverse('api:simple-list')
+        self.url = reverse('simple-list')
 
     def test_get_single(self):
         """
@@ -183,7 +183,7 @@ class TestBulkAPIViewSet(TestCase):
         """
         obj = SimpleModel.objects.create(contents='hello world', number=7)
 
-        response = self.client.get(reverse('api:simple-detail', args=[obj.pk]))
+        response = self.client.get(reverse('simple-detail', args=[obj.pk]))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
