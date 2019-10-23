@@ -1,12 +1,12 @@
 from __future__ import print_function, unicode_literals
+
 import inspect
 
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import SkipField
 from rest_framework.serializers import ListSerializer
 from rest_framework.settings import api_settings
 from rest_framework.utils import html
-from rest_framework.fields import SkipField
-
 
 __all__ = [
     'BulkListSerializer',
@@ -115,8 +115,13 @@ class BulkListSerializer(ListSerializer):
 
         for item in data:
             try:
-                self.child.instance = self.instance.get(id=item['id']) if self.instance else None
-                self.child.initial_data = item
+                if self.instance:
+                    try:
+                        self.child.instance = self.instance.get(id=item['id'])
+                        self.child.initial_data = item
+                    except getattr(self.child.Meta.model, 'DoesNotExist') as exc:
+                        raise ValidationError({'non_field_errors': [str(exc)]})
+
                 validated = self.child.run_validation(item)
             except ValidationError as exc:
                 errors.append(exc.detail)
