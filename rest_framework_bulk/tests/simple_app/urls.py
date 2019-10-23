@@ -10,6 +10,5 @@ router = BulkRouter()
 router.register('simple', SimpleViewSet, 'simple')
 
 urlpatterns = (
-    '',
     url(r'^api/', include(router.urls)),
 )
