@@ -22,8 +22,8 @@ Requirements
 ------------
 
 * Python>=2.7
-* Django>=1.3
-* Django REST Framework >= 3.0.0
+* Django==2.2.*
+* Django REST Framework<3.10.0
 * REST Framework >= 2.2.5
   (**only with** Django<1.8 since DRF<3 does not support Django1.8)
 
